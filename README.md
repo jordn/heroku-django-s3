@@ -141,68 +141,68 @@ This setup using the excellent virtualenvwrapper to isolate the installed depend
 
 Removed sites add-on that can enable multiple sites to use the same back-end but confuses matters here.
 
-	```python
-	# 'django.contrib.sites' #REMOVED
-	```
+```python
+# 'django.contrib.sites' #REMOVED
+```
 
 As part of the plan to make the settings.py file to be transferable and secure did the following:
 
 Make DEBUG an environmental variable
 
-	```python
-	import os 
+```python
+import os 
 
-	# Added to help use env variables
-	def env_var(key, default=None):
-	    """Retrieves env vars and makes Python boolean replacements"""
-	    val = os.environ.get(key, default)
-	    if val == 'True':
-	        val = True
-	    elif val == 'False':
-	        val = False
-	    return val
+# Added to help use env variables
+def env_var(key, default=None):
+    """Retrieves env vars and makes Python boolean replacements"""
+    val = os.environ.get(key, default)
+    if val == 'True':
+        val = True
+    elif val == 'False':
+        val = False
+    return val
 
-	DEBUG = env_var('DJ_DEBUG', False) #Unless env var is set to True, debug is off
-	````
+DEBUG = env_var('DJ_DEBUG', False) #Unless env var is set to True, debug is off
+```
 
 SECRET_KEY removed form the file to be stored as env var:
 
-	```python
-	SECRET_KEY = os.environ['DJ_SECRET_KEY']
-	```
+```python
+SECRET_KEY = os.environ['DJ_SECRET_KEY']
+```
 
 Allowed hosts (which domains can host the site when debug is off) set to allow only subdomains of heroku. **Remember to change this to be most specific!**
 	
-	```python
-	# SET TO THE  SUBDOMAIN ON HEROKU, ANYWHERE ELSE IT'S HOSTED (INSECURE PRESENTLY)    <--------!!!!!
-	ALLOWED_HOSTS = ['.herokuapp.com']
-	```
+```python
+# SET TO THE  SUBDOMAIN ON HEROKU, ANYWHERE ELSE IT'S HOSTED (INSECURE PRESENTLY)    <--------!!!!!
+ALLOWED_HOSTS = ['.herokuapp.com']
+```
 
 Added database settings as env var
 	
-	```python	
-	# Parse database configuration from $DATABASE_URL
-	import dj_database_url
-	DATABASES['default'] =  dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+```python	
+# Parse database configuration from $DATABASE_URL
+import dj_database_url
+DATABASES['default'] =  dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 
-	# Honor the 'X-Forwarded-Proto' header for request.is_secure()
-	SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-	```
+# Honor the 'X-Forwarded-Proto' header for request.is_secure()
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+```
 
 Uncommented admin, admindocs and `'storages'` to `INSTALLED_APPS`
 
 Added settings to store statics on S3
 	
-	```python
-	#Storage on S3 settings are stored as os.environs to keep settings.py clean 
-	if not DEBUG:
-		AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
-		AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
-		AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
-		STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-		S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
-		STATIC_URL = S3_URL
-	```
+```python
+#Storage on S3 settings are stored as os.environs to keep settings.py clean 
+if not DEBUG:
+	AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
+	AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+	AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+	STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+	S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+	STATIC_URL = S3_URL
+```
 
 `urls.py`
 Uncommented lines 4, 5, 13 and 16 from urls to enable admin urls
