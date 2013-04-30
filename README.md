@@ -12,91 +12,92 @@ heroku-django-s3
 This collection is touted as one fo the best ways to serve up django apps, that's free initially and can scale up easily.
 
 ### Pre-requisites
-This setup using the excellent virtualenvwrapper to isolate the installed dependencies to just this project.
+This setup using the excellent virtualenvwrapper to isolate the installed dependencies and environmental variables.
 
 - heroku account and [toolbelt](https://toolbelt.heroku.com/) installed on your computer
 - git installed
 - [virtualenv](https://pypi.python.org/pypi/virtualenv) and [virtualenvwrapper](https://bitbucket.org/dhellmann/virtualenvwrapper)
 - an amazon web services account
 
-### Installation
+## Installation
 
 1. First make a new virtualenv
 
-	mkvirtualenv [name-of-your-project]
+		mkvirtualenv [name-of-your-project]
 
 2. Now git clone this repo 
 
-	git clone https://github.com/jordn/heroku-django-s3 [name-of-your-project]
+	    git clone https://github.com/jordn/heroku-django-s3 [name-of-your-project]
 
-3. Now 	need to install all the dependencies with pip. These are specified in requirements.txt (if you edit this to remove the version numbers it will install the latest versions available)
+3. Now 	need to install all the dependencies (django, psycopg2, gunicorn dj-database-url boto and django-storages) with pip. These are specified in requirements.txt (if you edit this to remove the version numbers it will install the latest versions available)
 
-	pip install -r requirements.txt
+    	pip install -r requirements.txt
 
 4. The django settings is kept general and all the private or environment-dependant settings are kept as environmental variables (see http://www.12factor.net/config for why).
 	We need to set these settings to come into effect everytime we enter this virtual environment. virtualenvwrapper does this with a `postactivate` script
 
-	vim $VIRTUAL_ENV/bin/postactivate 
+    	vim $VIRTUAL_ENV/bin/postactivate 
 
 	use `vim`, `nano`, or `subl` (sublime text) or whatever you're most comfortable to edit the file. Add set the following variables:
 
-	#!/bin/zsh
-	# This hook is run after this virtualenv is activated.
-	# Django database
-	export DATABASE_URL=sqlite:////[path to whereever you'd like to store the sqlite (easiest) database for local dev]
+    	#!/bin/zsh
+    	# This hook is run after this virtualenv is activated.
+    	# Django database
+    	export DATABASE_URL=sqlite:////[path to whereever you'd like to store the sqlite (easiest) database for local dev]
 
-	# Django static file storage
-	export AWS_STORAGE_BUCKET_NAME=[YOUR AWS S3 BUCKET NAME]
-	export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXX
-	export AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXXXX-XXXXXXXXXX
-
-	# Django debug setting
-	export DJ_DEBUG=True
-	export DJ_SECRET_KEY=[A random sequence of around 40 characters django uses for added security]
+    	# Django static file storage
+    	export AWS_STORAGE_BUCKET_NAME=[YOUR AWS S3 BUCKET NAME]
+    	export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXX
+    	export AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXXXX-XXXXXXXXXX
+    
+    	# Django debug setting
+    	export DJ_DEBUG=True
+    	export DJ_SECRET_KEY=[A random sequence of around 40 characters django uses for added security]
 
 5. These changes won't come into affect until this script is run. Easiest way is to reopen the virtualenv
 
-	workon [name-of-your-project]
+    	workon [name-of-your-project]
 
 6. Everything should now work for local development.
 
-	python manage.py syncdb
-	...
-	python manage.py runserver
+    	python manage.py syncdb
+    	...
+    	python manage.py runserver
 
-7. Should be able to see the admin pages at http://127.0.0.1:8000/admin/
-
-#### Get it running on heroku
+7. Should be able to see the admin pages at `http://127.0.0.1:8000/admin/`
 
 8. Create the app on heroku
 
-	heroku create [name-of-your-project]
+    	heroku create [name-of-your-project]
 
 9. Push everything to heroku and it will detect we're making a python web app and install everything in requirements.txt (update this file with `pip freeze > requirements.txt`)
 
-	git push heroku master
+    	git push heroku master
 
 10. Heroku will fail because the django app's settings aren't available as environmental variables so set them (`DATABASE_URL` is set by default on heroku):
 
-	heroku config:add AWS_STORAGE_BUCKET_NAME=[YOUR AWS S3 BUCKET NAME]
-	heroku config:add AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXX
-	heroku config:add AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXXXX-XXXXXXXXXX
-	heroku config:add DJ_SECRET_KEY=[Any random sequence of around 40 characters django uses for added security]
+        heroku config:add AWS_STORAGE_BUCKET_NAME=[YOUR AWS S3 BUCKET NAME]
+    	heroku config:add AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXX
+    	heroku config:add AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXXXX-XXXXXXXXXX
+    	heroku config:add DJ_SECRET_KEY=[Any random sequence of around 40 characters django uses for added security]
 
-You can turn debug on/off by changing the DJ_DEBUG setting (only do something has gone wrong):
+    You can turn debug on/off by changing the DJ_DEBUG setting (only do something has gone wrong):
 
-	heroku config:add DJ_DEBUG=True   
+    	heroku config:add DJ_DEBUG=True   
+    	
+    *Note: static files aren't served from S3 in debug mode*
 
-*Note: static files aren't served from S3 in debug mode*
+11. Should now be pretty much setup and can get on with building your django app
 
-11. Should now be pretty much setup 
+    	python manage.py syncdb
+    	...
+    	heroku open
 
-	python manage.py syncdb
-	...
-	python 
+    Lastly, go into settings.py and change the trusted hosts to be specifically your domains (for added security)
 
+    	ALLOWED_HOSTS = ['[your-project-name].herokuapp.com']
 
-### What's going on
+### What's changed since fresh django install: instructions performed to create this.
 
 mkvirtualenv django
 mkdir herokuproject
@@ -104,8 +105,7 @@ cd herokuproject
 git init
 git commit -a -m 'First commit of generic heroku/django/s3 project'
 pip install django psycopg2 gunicorn dj-database-url (https://github.com/kennethreitz/dj-database-url to use a 12factor inspired DATABSE_URL env var to configure django)
-django-admin.py startproject djangoproject . **********  full stop added after failure
-<!-- This is differing from https://devcenter.heroku.com/articles/django  -->
+django-admin.py startproject djangoproject .
 
 echo "web: gunicorn djangoproject.wsgi" > Procfile
 foreman start (it works!)
@@ -120,17 +120,13 @@ foreman start (it works!)
 	heroku create [name]
 
 	git push heroku master
-[broken].
 
-[Copied the django project up on level ********** and did necessary git commits]
 http://fathomless-ravine-5669.herokuapp.com/  working, standard django project!!
-
-
 
 Uncommented admin, admin docs in settings.py INSTALLED_APPS.
 Uncommented lines 4,5 13 and 16 from urls to enable admin
 
-#local
+#####local
  "settings.DATABASES is improperly configured. Please supply the ENGINE value. Check settings documentation for more details.""
 so added a default to that we did earlier: 
 
@@ -146,12 +142,15 @@ and set $VIRTUAL_ENV/django/bin/postactivate shell script to include
 syncdb (have kept settings in git, not included sqlite db)
 **working admin! (if using runserver, css works. if using foreman, css not showing)**
 
-#remote
+####remote
 http://fathomless-ravine-5669.herokuapp.com/admin/ 
 	"DoesNotExist at /admin/
 	Site matching query does not exist. Lookup parameters were {'pk': 1}"
 
-Removed     # 'django.contrib.sites', form INSTALLED_APPS
+Removed
+
+     # 'django.contrib.sites', form INSTALLED_APPS
+
 Working but no statics served!
 
 
@@ -159,11 +158,13 @@ Working but no statics served!
 #Statics
 Django-storages (custom storage backends for django, best supported for S3 if you install boto) http://django-storages.readthedocs.org/en/latest/backends/amazon-S3.html
 Boto (Python interface to Amazon Web Services, simplifies the AWS connection to just your access keys)
+	
 	pip install django-storages boto 
 
 Added 'storages' to INSTALLED_APPS in settings.py
 
 and the follwing to the bottom of settings.py
+
 	#Storage on S3 settings are stored as os.environs to keep settings.py clean 
 	AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
 	STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -171,18 +172,20 @@ and the follwing to the bottom of settings.py
 	STATIC_URL = S3_URL
 
 set env variable on heroku by 
+
 	heroku config:add AWS_STORAGE_BUCKET_NAME='static-server'
 
 and locally (added to postactivate script)
+
 	export AWS_STORAGE_BUCKET_NAME=static-server
 	export AWS_ACCESS_KEY_ID=AKIAIM3UG6KGL46ROKSA
 	export AWS_SECRET_ACCESS_KEY=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
 
-collectstatic and it plops it all on s3
-and it works. 
+collectstatic and it plops it all on s3 and it works. 
 
 
-pip freeze > requirements.txt
+	pip freeze > requirements.txt
+
 and send it back up to github to install storages, boto
 
 
@@ -229,4 +232,4 @@ settings.py:
 settings.py:
 
 	# SET TO THE  SUBDOMAIN ON HEROKU, ANYWHERE ELSE IT'S HOSTED (INSECURE PRESENTLY)    <--------!!!!!
-	ALLOWED_HOSTS = ['*.herokuapp.com']
+	ALLOWED_HOSTS = ['.herokuapp.com']
