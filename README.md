@@ -1,10 +1,28 @@
 heroku-django-s3
 ================
 
-A clean project of a Django web-framework running on Heroku with static files served from Amazon S3.
+*A clean project of a Django web-framework running on Heroku with static files served from Amazon S3, attempting to follow the [12-factor](http://www.12factor.net/) design pattern.*
+
+**Django** is a web framework that simplifies the work required to make a web app in python.
+
+**Heroku** is touted as one of the best 'platform as a service' providers. You can host apps without having to get too involved with installing your own serving software etc.
+
+**Amazon S3** is a quick, cheap way to host static files (images, js, css etc. that doesn't change) because heroku doesn't do that.
+
+This collection is touted as one fo the best ways to serve up django apps, that's free initially and can scale up easily.
+
+### Pre-requisites
+This setup using the excellent virtualenvwrapper to isolate the installed dependencies to just this project.
+
+- heroku account and [toolbelt](https://toolbelt.heroku.com/) installed on your computer
+- git installed
+- [virtualenv](https://pypi.python.org/pypi/virtualenv) and [virtualenvwrapper](https://bitbucket.org/dhellmann/virtualenvwrapper)
+- an amazon web services account
+
+### Installation
 
 
-(heroku, git, virtualenv and virtualenvwrapper)
+### What's going on
 
 mkvirtualenv django
 mkdir herokuproject
@@ -18,16 +36,16 @@ django-admin.py startproject djangoproject . **********  full stop added after f
 echo "web: gunicorn djangoproject.wsgi" > Procfile
 foreman start (it works!)
 
-cd ..
-added .gitignore
-git add .
-git commit -m "Pip installed, django project started"
+	cd ..
+	added .gitignore
+	git add .
+	git commit -m "Pip installed, django project started"
 
 [added database url bit to end of settings]
 
-heroku create [name]
+	heroku create [name]
 
-git push heroku master
+	git push heroku master
 [broken].
 
 [Copied the django project up on level ********** and did necessary git commits]
@@ -41,10 +59,12 @@ Uncommented lines 4,5 13 and 16 from urls to enable admin
 #local
  "settings.DATABASES is improperly configured. Please supply the ENGINE value. Check settings documentation for more details.""
 so added a default to that we did earlier: 
+
 	import os
 	DATABASES['default'] =  dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 
 and set $VIRTUAL_ENV/django/bin/postactivate shell script to include
+
 	#!/bin/zsh
 	# This hook is run after this virtualenv is activated.
 	export DATABASE_URL=sqlite:////Users/jordanburgess/Projects/herokuproject/djangoproject/sqlite.db
@@ -90,3 +110,26 @@ and it works.
 
 pip freeze > requirements.txt
 and send it back up to github to install storages, boto
+
+
+Added to postactivate
+
+	# Django debug setting
+	export DJ_DEBUG=True
+
+Added to settings.py
+
+	# Added to help use env variables
+	def env_var(key, default=None):
+	    """Retrieves env vars and makes Python boolean replacements"""
+	    val = os.environ.get(key, default)
+	    if val == 'True':
+	        val = True
+	    elif val == 'False':
+	        val = False
+	    return val
+
+
+Added to settings.py
+
+	DEBUG = env_var('DJ_DEBUG', False) #Unless env var is set to True, debug is off
