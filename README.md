@@ -112,6 +112,8 @@ pip freeze > requirements.txt
 and send it back up to github to install storages, boto
 
 
+#### Taken debug setting as an environmental variable as it changes between local and remote
+
 Added to postactivate
 
 	# Django debug setting
@@ -133,3 +135,24 @@ Added to settings.py
 Added to settings.py
 
 	DEBUG = env_var('DJ_DEBUG', False) #Unless env var is set to True, debug is off
+
+#### SECRET_KEY as environmental variable
+
+postactivate:
+
+	export DJ_SECRET_KEY='!@$@£%@£%@£%£@%£@%@£%£@......'
+
+heroku:
+	
+	heroku config:add DJ_SECRET_KEY='!@$@£%@£%@£%£@%£@%@£%£@......'
+
+settings.py:
+
+	SECRET_KEY = os.environ['DJ_SECRET_KEY']
+
+#### ALLOWED_HOSTS to allow all heroku subdomains (Should be changed!)
+
+settings.py:
+
+	# SET TO THE  SUBDOMAIN ON HEROKU, ANYWHERE ELSE IT'S HOSTED (INSECURE PRESENTLY)    <--------!!!!!
+	ALLOWED_HOSTS = ['*.herokuapp.com']
