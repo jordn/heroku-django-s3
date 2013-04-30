@@ -21,6 +21,80 @@ This setup using the excellent virtualenvwrapper to isolate the installed depend
 
 ### Installation
 
+1. First make a new virtualenv
+
+	mkvirtualenv [name-of-your-project]
+
+2. Now git clone this repo 
+
+	git clone https://github.com/jordn/heroku-django-s3 [name-of-your-project]
+
+3. Now 	need to install all the dependencies with pip. These are specified in requirements.txt (if you edit this to remove the version numbers it will install the latest versions available)
+
+	pip install -r requirements.txt
+
+4. The django settings is kept general and all the private or environment-dependant settings are kept as environmental variables (see http://www.12factor.net/config for why).
+	We need to set these settings to come into effect everytime we enter this virtual environment. virtualenvwrapper does this with a `postactivate` script
+
+	vim $VIRTUAL_ENV/bin/postactivate 
+
+	use `vim`, `nano`, or `subl` (sublime text) or whatever you're most comfortable to edit the file. Add set the following variables:
+
+	#!/bin/zsh
+	# This hook is run after this virtualenv is activated.
+	# Django database
+	export DATABASE_URL=sqlite:////[path to whereever you'd like to store the sqlite (easiest) database for local dev]
+
+	# Django static file storage
+	export AWS_STORAGE_BUCKET_NAME=[YOUR AWS S3 BUCKET NAME]
+	export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXX
+	export AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXXXX-XXXXXXXXXX
+
+	# Django debug setting
+	export DJ_DEBUG=True
+	export DJ_SECRET_KEY=[A random sequence of around 40 characters django uses for added security]
+
+5. These changes won't come into affect until this script is run. Easiest way is to reopen the virtualenv
+
+	workon [name-of-your-project]
+
+6. Everything should now work for local development.
+
+	python manage.py syncdb
+	...
+	python manage.py runserver
+
+7. Should be able to see the admin pages at http://127.0.0.1:8000/admin/
+
+#### Get it running on heroku
+
+8. Create the app on heroku
+
+	heroku create [name-of-your-project]
+
+9. Push everything to heroku and it will detect we're making a python web app and install everything in requirements.txt (update this file with `pip freeze > requirements.txt`)
+
+	git push heroku master
+
+10. Heroku will fail because the django app's settings aren't available as environmental variables so set them (`DATABASE_URL` is set by default on heroku):
+
+	heroku config:add AWS_STORAGE_BUCKET_NAME=[YOUR AWS S3 BUCKET NAME]
+	heroku config:add AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXX
+	heroku config:add AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXXXX-XXXXXXXXXX
+	heroku config:add DJ_SECRET_KEY=[Any random sequence of around 40 characters django uses for added security]
+
+You can turn debug on/off by changing the DJ_DEBUG setting (only do something has gone wrong):
+
+	heroku config:add DJ_DEBUG=True   
+
+*Note: static files aren't served from S3 in debug mode*
+
+11. Should now be pretty much setup 
+
+	python manage.py syncdb
+	...
+	python 
+
 
 ### What's going on
 
