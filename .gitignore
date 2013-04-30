@@ -36,3 +36,4 @@ pip-log.txt
 *.log
 *.pot
 local_settings.py
+sqlite.db

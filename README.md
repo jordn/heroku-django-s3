@@ -61,3 +61,28 @@ Removed     # 'django.contrib.sites', form INSTALLED_APPS
 Working but no statics served!
 
 
+
+#Statics
+Django-storages (custom storage backends for django, best supported for S3 if you install boto) http://django-storages.readthedocs.org/en/latest/backends/amazon-S3.html
+Boto (Python interface to Amazon Web Services, simplifies the AWS connection to just your access keys)
+	pip install django-storages boto 
+
+Added 'storages' to INSTALLED_APPS in settings.py
+
+and the follwing to the bottom of settings.py
+	#Storage on S3 settings are stored as os.environs to keep settings.py clean 
+	AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
+	STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+	S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+	STATIC_URL = S3_URL
+
+set env variable on heroku by 
+	heroku config:add AWS_STORAGE_BUCKET_NAME='static-server'
+
+and locally (added to postactivate script)
+	export AWS_STORAGE_BUCKET_NAME=static-server
+	export AWS_ACCESS_KEY_ID=AKIAIM3UG6KGL46ROKSA
+	export AWS_SECRET_ACCESS_KEY=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
+
+collectstatic and it plops it all on s3
+and it works. 
