@@ -1,7 +1,7 @@
 heroku-django-s3
 ================
 
-*A clean project of a Django web-framework running on Heroku with static files served from Amazon S3, attempting to follow the [12-factor](http://www.12factor.net/) design pattern.*
+###*A clean project of a Django web-framework running on Heroku with static files served from Amazon S3, attempting to follow the [12-factor](http://www.12factor.net/) design pattern.*
 
 **Django** is a web framework that simplifies the work required to make a web app in python.
 
