@@ -86,3 +86,7 @@ and locally (added to postactivate script)
 
 collectstatic and it plops it all on s3
 and it works. 
+
+
+pip freeze > requirements.txt
+and send it back up to github to install storages, boto
