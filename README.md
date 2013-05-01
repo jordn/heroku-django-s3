@@ -21,11 +21,12 @@ This setup using the excellent virtualenvwrapper to isolate the installed depend
 
 ## Installation
 
-1. Make a new virtualenv and clone this repo into it
+1. Make a new virtualenv and clone this repo
         
     ```sh
     mkvirtualenv [name-of-your-project]
     git clone https://github.com/jordn/heroku-django-s3 [name-of-your-project]
+    cd [name-of-your-project]
     ```
 2. Install all the dependencies (django, psycopg2, gunicorn, dj-database-url, boto and django-storages) with pip. These are specified in requirements.txt (if you edit this file to remove the version numbers it will install the latest versions available)
 
@@ -46,11 +47,11 @@ This setup using the excellent virtualenvwrapper to isolate the installed depend
     #!/bin/zsh
     # This hook is run after this virtualenv is activated.
     # Django database
-    export DATABASE_URL=sqlite:////[path to whereever you'd like to store the sqlite (easiest) database for local dev]
+    export DATABASE_URL=sqlite:////[path to where you would like to store the sqlite (easiest) database for local dev]/sqlite.db
     # Django static file storage
     export AWS_STORAGE_BUCKET_NAME=[YOUR AWS S3 BUCKET NAME]
     export AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXX
-    export AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXXXX-XXXXXXXXXX
+    export AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     # Django debug setting
     export DJ_DEBUG=True
     export DJ_SECRET_KEY=[Any random sequence of 40ish characters  - django uses it for added security]
@@ -88,7 +89,7 @@ This setup using the excellent virtualenvwrapper to isolate the installed depend
     heroku config:add DJ_SECRET_KEY=[Any random sequence of around 40 characters django uses for added security]
     ```
 
-    You can turn debug on/off by changing the DJ_DEBUG setting (only do something has gone wrong. *Note: static files aren't served from S3 in debug mode*):
+    You can turn debug on/off by changing the DJ_DEBUG setting (only do this if something has gone wrong. *Note: static files aren't served from S3 in debug mode*):
 
     ```sh
     heroku config:add DJ_DEBUG=True
@@ -97,11 +98,14 @@ This setup using the excellent virtualenvwrapper to isolate the installed depend
 8. Should now be ready. Go and build that web app!
 
     ```sh
-    python manage.py syncdb
+    heroku run python manage.py syncdb
+    heroku run python manage.py collectstatic
     ...
     heroku open
     ```
+    **Go to http://[your-project-name].herokuapp.com/admin and you should see a CSS-styled admin login if it's all worked correctly.**
 
+        
     Lastly, go into settings.py and change the trusted hosts to be specifically your domains (for added security)
 
     ```python
