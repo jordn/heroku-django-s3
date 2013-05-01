@@ -1,7 +1,7 @@
-Django==1.5.1
-boto==2.9.0
-dj-database-url==0.2.1
-django-storages==1.1.8
-gunicorn==0.17.4
-psycopg2==2.5
-wsgiref==0.1.2
+Django
+boto
+dj-database-url
+django-storages
+gunicorn
+psycopg2
+wsgiref
