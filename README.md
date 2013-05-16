@@ -78,15 +78,16 @@ This setup using the excellent virtualenvwrapper to isolate the installed depend
     heroku create [name-of-your-project]
     ...
     git push heroku master
+    ...
     ```
 
-7. The heroku django won't work without the environmental variables being set (`DATABASE_URL` is already set on heroku):
+7. The heroku django needs the environmental variables too (`DATABASE_URL` is already set on heroku) so we'll send over the values set locally:
 
     ```sh
-    heroku config:add AWS_STORAGE_BUCKET_NAME=[YOUR AWS S3 BUCKET NAME]
-    heroku config:add AWS_ACCESS_KEY_ID=XXXXXXXXXXXXXXXXXXXX
-    heroku config:add AWS_SECRET_ACCESS_KEY=XXXXXXXXXXXXXXXXX-XXXXXXXXXX
-    heroku config:add DJ_SECRET_KEY=[Any random sequence of around 40 characters django uses for added security]
+    heroku config:add AWS_STORAGE_BUCKET_NAME=$AWS_STORAGE_BUCKET_NAME
+    heroku config:add AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+    heroku config:add AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+    heroku config:add DJ_SECRET_KEY=$DJ_SECRET_KEY
     ```
 
     You can turn debug on/off by changing the DJ_DEBUG setting (only do this if something has gone wrong. *Note: static files aren't served from S3 in debug mode*):
